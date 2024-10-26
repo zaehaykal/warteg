@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/menu', [MenuController::class, 'index']);
 Route::post('/menu', [MenuController::class, 'store']);
 Route::get('/menu/{id}', [MenuController::class, 'show']);
-Route::put('/menu/{id}', [MenuController::class, 'update']);
+Route::post('/menu/update/{id}', [MenuController::class, 'update']);
 Route::delete('/menu/{id}', [MenuController::class, 'destroy']);
 
 Route::apiResource('admins', AdminController::class);

@@ -17,5 +17,6 @@ class Menu extends Model
         'nama',
         'harga',
         'kategori',
+        'foto',
     ];
 }

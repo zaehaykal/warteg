@@ -14,7 +14,7 @@ class CreateMenuTable extends Migration
         Schema::create('menu', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->integer('harga');
+            $table->string('harga');
             $table->string('kategori');
             $table->timestamps(); // Menambahkan created_at dan updated_at
         });

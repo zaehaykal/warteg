@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Menu;
+use App\Models\Menu; // Pastikan ini sesuai dengan namespace model Menu
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -14,61 +15,82 @@ class MenuController extends Controller
         return response()->json($menus);
     }
 
+    public function show($id)
+    {
+        $menu = Menu::find($id); // Mencari menu berdasarkan ID
+
+        if (!$menu) {
+            return response()->json(['message' => 'Menu not found'], 404); // Menangani jika menu tidak ditemukan
+        }
+
+        return response()->json($menu); // Mengembalikan data menu
+    }
+
+    // Menyimpan data menu baru
     public function store(Request $request)
     {
         // Validasi input
         $request->validate([
-            'nama' => 'required|string',
-            'harga' => 'required|numeric',
-            'kategori' => 'required|string',
+            'nama' => 'required|string|max:255',
+            'harga' => 'required|string|max:225',
+            'kategori' => 'required|string|max:255',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Max size 2MB
         ]);
 
-        // Menyimpan data ke dalam tabel menu
-        $menu = Menu::create($request->all());
-
-        // Mengembalikan response json
-        return response()->json($menu, 201);
-    }
-
-
-    public function show($id)
-    {
-        // Menampilkan data menu berdasarkan ID
-        $menu = Menu::find($id);
-        if (!$menu) {
-            return response()->json(['message' => 'Menu not found'], 404);
+        // Mengupload file foto
+        $filename = null; // Inisialisasi variabel filename
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $filename); // Menyimpan file di folder 'public/uploads'
         }
-        return response()->json($menu);
+
+        // Membuat data menu baru
+        $menu = Menu::create([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'kategori' => $request->kategori,
+            'foto' => $filename, // Menyimpan nama file di database
+        ]);
+
+        return response()->json(['message' => 'Berhasil input data', 'data' => $menu], 201);
     }
 
     public function update(Request $request, $id)
     {
+        // Mencari menu berdasarkan ID
+        $menu = Menu::find($id);
+
         // Validasi input
         $request->validate([
-            'nama' => 'string',
-            'harga' => 'numeric',
-            'kategori' => 'string',
+            'nama' => 'nullable|string|max:255',
+            'harga' => 'nullable|string|max:255',
+            'kategori' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max size 2MB
         ]);
 
-        // Mengupdate data menu berdasarkan ID
-        $menu = Menu::find($id);
         if (!$menu) {
-            return response()->json(['message' => 'Menu not found'], 404);
+            return response()->json(['message' => 'Menu tidak ditemukan'], 404);
         }
 
+        // Proses upload foto
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($menu->foto) {
+                // Hapus foto dari folder uploads
+                if (file_exists(public_path('uploads/' . $menu->foto))) {
+                    unlink(public_path('uploads/' . $menu->foto)); // Menghapus foto yang sudah ada
+                }
+            }
+            // Simpan foto baru dan update path di database
+            $filename = time() . '.' . $request->file('foto')->getClientOriginalExtension();
+            $request->file('foto')->move(public_path('uploads'), $filename);
+            $menu->foto = $filename; // Update nama file di database
+        }
+
+        // Mengupdate data menu, termasuk nama, harga, dan kategori
         $menu->update($request->only(['nama', 'harga', 'kategori']));
-        return response()->json($menu);
-    }
 
-    public function destroy($id)
-    {
-        // Menghapus data menu berdasarkan ID
-        $menu = Menu::find($id);
-        if (!$menu) {
-            return response()->json(['message' => 'Menu not found'], 404);
-        }
-
-        $menu->delete();
-        return response()->json(['message' => 'Menu deleted successfully']);
+        return response()->json(['message' => 'Berhasil memperbarui data', 'data' => $menu], 200);
     }
 }
