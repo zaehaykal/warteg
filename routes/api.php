@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\PenggunaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,12 @@ Route::post('/menu', [MenuController::class, 'store']);
 Route::get('/menu/{id}', [MenuController::class, 'show']);
 Route::post('/menu/update/{id}', [MenuController::class, 'update']);
 Route::delete('/menu/{id}', [MenuController::class, 'destroy']);
+
+
+// Route::get('/pengguna', [PenggunaController::class, 'index']);
+// Route::get('/pengguna/{id}', [PenggunaController::class, 'show']);
+// Route::post('/pengguna', [PenggunaController::class, 'store']);
+
+Route::apiResource('pengguna', PenggunaController::class);
 
 Route::apiResource('admins', AdminController::class);
