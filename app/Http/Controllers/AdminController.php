@@ -20,9 +20,9 @@ class AdminController extends Controller
     {
         // Validasi input
         $request->validate([
-            'nama' => 'required|string',
-            'nomorhp' => 'required|string',
-            'jenkel' => 'required|string',
+            'nama' => 'required|string|max:255',
+            'nomorhp' => 'required|string|max:255',
+            'jenkel' => 'required|string|max:255',
             'role' => 'required|string',
             'email' => 'required|string|email|unique:admins',
             'password' => 'required|string|min:8',
@@ -38,7 +38,7 @@ class AdminController extends Controller
             'password' => Hash::make($request->password), // Hash password
         ]);
 
-        return response()->json($admin, 201); // Mengembalikan data admin yang baru dibuat
+        return response()->json($admin, 200); // Mengembalikan data admin yang baru dibuat
     }
 
     // Menampilkan data admin berdasarkan ID

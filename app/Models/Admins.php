@@ -14,11 +14,11 @@ class Admins extends Model
 
     // Menentukan field yang bisa diisi
     protected $fillable = [
-        'nama' => 'required|string|max:255',
-            'nohp' => 'required|string|max:255',
-            'alamat' => 'required|string|max:255',
-            'foto' => 'required|string|max:255',
-            'email' => 'required|string|max:255',
-            'password' => 'required|string|max:255',    
+        'nama',
+        'nomorhp',
+        'jenkel',
+        'role',
+        'email',
+        'password',
     ];
 }
