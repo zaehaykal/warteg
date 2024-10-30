@@ -17,13 +17,13 @@ class MenuController extends Controller
 
     public function show($id)
     {
-        $menu = Menu::find($id); // Mencari menu berdasarkan ID
+        $menu = Menu::find($id);
 
         if (!$menu) {
-            return response()->json(['message' => 'Menu not found'], 404); // Menangani jika menu tidak ditemukan
+            return response()->json(['message' => 'Menu not found'], 404);
         }
 
-        return response()->json($menu); // Mengembalikan data menu
+        return response()->json($menu);
     }
 
     // Menyimpan data menu baru
@@ -45,7 +45,7 @@ class MenuController extends Controller
             $file->move(public_path('uploads'), $filename); // Menyimpan file di folder 'public/uploads'
         }
 
-        // Membuat data menu baru
+        // Membuat  data menu baru
         $menu = Menu::create([
             'nama' => $request->nama,
             'harga' => $request->harga,
@@ -92,5 +92,18 @@ class MenuController extends Controller
         $menu->update($request->only(['nama', 'harga', 'kategori']));
 
         return response()->json(['message' => 'Berhasil memperbarui data', 'data' => $menu], 200);
+    }
+
+    public function destroy($id)
+    {
+        $menu = Menu::find($id); // Mencari menu berdasarkan ID
+
+        if (!$menu) {
+            return response()->json(['message' => 'menu not found'], 404); // Menangani jika menu tidak ditemukan
+        }
+
+        $menu->delete(); // Menghapus data menu
+
+        return response()->json(['message' => 'menu deleted successfully']); // Mengembalikan pesan sukses
     }
 }

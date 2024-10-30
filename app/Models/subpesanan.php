@@ -14,7 +14,7 @@ class subpesanan extends Model
     protected $fillable = [
         'pesanan_id',
         'menu_id',
-        'nama_id',
+        'nama_menu',
         'quantity',
         'harga',
         'total'
