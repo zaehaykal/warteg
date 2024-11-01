@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PesananController;
@@ -29,10 +30,32 @@ Route::get('/menu/{id}', [MenuController::class, 'show']);
 Route::post('/menu/update/{id}', [MenuController::class, 'update']);
 Route::delete('/menu/{id}', [MenuController::class, 'destroy']);
 
-Route::get('/pengguna', [PenggunaController::class, 'index']);
-Route::get('/pengguna/{id}', [PenggunaController::class, 'show']);
-Route::post('/pengguna', [PenggunaController::class, 'store']);
-Route::post('/pengguna/update/{id}', [PenggunaController::class, 'update']);
+ 
+Route::prefix('auth')->group(function () { 
+    Route::get('/', [AuthController::class, 'index']); 
+    Route::post('/login', [AuthController::class, 'login']); 
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->middleware('auth:sanctum'); 
+    Route::get('/me', [AuthController::class, 'me'])
+        ->middleware('auth:sanctum'); 
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
+
+
+
+Route::prefix('/pengguna')->group(function () {
+    Route::get('/', [PenggunaController::class, 'index']);
+    Route::get('/{id}', [PenggunaController::class, 'show']);
+    Route::post('/', [PenggunaController::class, 'store']);
+    Route::post('/update/{id}', [PenggunaController::class, 'update']);
+    Route::delete('/{id}', [PenggunaController::class, 'destroy']);
+    Route::get('/image-upload/{id}', [PenggunaController::class, 'imageUpload'])->name('image.upload');
+    Route::get('/image/{image}', [PenggunaController::class, 'getImage'])->name('image.upload');
+    Route::post('/register', [PenggunaController::class, 'register']);
+    Route::post('/login', [PenggunaController::class, 'login']);
+});
+
 
 Route::get('/admins', [AdminController::class, 'index']);
 Route::get('/admins/{id}', [AdminController::class, 'show']);

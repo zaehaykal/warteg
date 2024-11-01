@@ -32,12 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        // Schema::table('pengguna', function (Blueprint $table) {
-        //     // Menghapus foreign key terlebih dahulu
-        //     $table->dropForeign(['pesanan']);
-        // });
-
-        // Menghapus tabel 'pengguna'
         Schema::dropIfExists('pengguna');
     }
 };
