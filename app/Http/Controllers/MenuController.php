@@ -12,7 +12,17 @@ class MenuController extends Controller
     {
         // Mengambil semua data dari tabel 'menu'
         $menus = Menu::all();
-        return response()->json($menus);
+
+        if ($menus->isEmpty()) {
+            return response()->json([
+                'message'=>'Tidak ada Data',
+                'data' => []
+            ], 404);
+        }
+        return response()->json([
+            'message'=> 'Data berhasil di muat',
+            'data' => $menus]);
+        
     }
 
     public function show($id)
