@@ -2,60 +2,235 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\pesanan;
-use App\Models\subpesanan;
-use Illuminate\Http\Request;
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use App\Models\Pesanan;
+use App\Models\Subpesanan;
+use Illuminate\Http\Request;
 
 class PesananController extends Controller
 {
     public function index()
     {
-        // Mendapatkan semua pesanan
-        return pesanan::all();
+        $pesanan = Pesanan::with('subpesanan')->get();
+
+        return response()->json([
+            'success' => true,
+            'listOrder' => $pesanan,
+        ], 200);
+    }
+    public function showOrderMenu()
+    {
+
+        $subpesanan = Subpesanan::with('menu')->get();
+
+
+        if ($subpesanan->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada subpesanan ditemukan.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $subpesanan,
+        ]);
     }
 
-    public function store(Request $request)
+    public function showOrder($id)
     {
-        // Validasi dan menyimpan pesanan baru
-        $request->validate([
-            'pengguna_id' => 'required|integer',
-            'total_harga' => 'required|numeric',
-            'tanggal_pesanan' => 'required|date'
-        ]);
+        $pesanan = Pesanan::where('id', $id)
+            ->with(['subpesanan.menu'])
+            ->first();
 
-        $pesanan = pesanan::create($request->all());
+        if (!$pesanan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
 
-        return response()->json($pesanan, 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pesanan berhasil ditemukan.',
+            'dataOrder' => [
+                'pesanan' => $pesanan,
+            ],
+        ], 200);
     }
 
     public function show($id)
     {
-        // Mendapatkan pesanan berdasarkan ID
-        $pesanan = pesanan::find($id);
+        $pesanan = Pesanan::with('subpesanan')->find($id);
 
         if (!$pesanan) {
-            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
         }
 
-        return $pesanan;
+        return response()->json([
+            'success' => true,
+            'data' => $pesanan,
+        ], 200);
     }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'nama' => 'required|string|max:255',
+            'nohp' => 'required|string|max:255',
+            'alamat' => 'required|string|max:255',
+            'total_harga' => 'required|numeric',
+            'status' => 'required|string|in:pending,completed,canceled',
+            'menu_items' => 'required|array',
+            'menu_items.*.menu_id' => 'required|exists:menu,id',
+            'menu_items.*.nama' => 'required|string',
+            'menu_items.*.foto' => 'nullable|string',
+            'menu_items.*.kategori' => 'nullable|string',
+            'menu_items.*.jumlah' => 'required|integer',
+            'menu_items.*.harga' => 'required|numeric',
+        ]);
+
+
+        $pesanan = Pesanan::create([
+            'user_id' => $validated['user_id'],
+            'nama' => $validated['nama'],
+            'nohp' => $validated['nohp'],
+            'alamat' => $validated['alamat'],
+            'total_harga' => $validated['total_harga'],
+            'status' => $validated['status'],
+        ]);
+
+        $subPesananList = [];
+
+        foreach ($validated['menu_items'] as $menu_item) {
+
+            $fotoPath = $menu_item['foto'] ?? null;
+
+
+            $subPesanan = Subpesanan::create([
+                'pesanan_id' => $pesanan->id,
+                'menu_id' => $menu_item['menu_id'],
+                'nama' => $menu_item['nama'],
+                'foto' => $fotoPath,
+                'kategori' => $menu_item['kategori'],
+                'jumlah' => $menu_item['jumlah'],
+                'harga' => $menu_item['harga'],
+            ]);
+
+
+            $subPesananList[] = $subPesanan;
+        }
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan berhasil dibuat.',
+            'pesanan' => $pesanan,
+            'subPesanan' => $subPesananList,
+        ], 201);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function destroy($id)
     {
-        // Menghapus pesanan berdasarkan ID
-        $pesanan = pesanan::find($id);
+
+        $pesanan = Pesanan::find($id);
 
         if (!$pesanan) {
-            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
-        }   
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
+
+
+        foreach ($pesanan->subpesanan as $subpesanan) {
+            if ($subpesanan->foto) {
+                $fotoPath = public_path($subpesanan->foto);
+                if (file_exists($fotoPath)) {
+                    unlink($fotoPath);
+                }
+            }
+        }
+
+
+        $pesanan->subpesanan()->delete();
+
 
         $pesanan->delete();
 
-        return response()->json(['message' => 'Pesanan berhasil dihapus']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Pesanan dan foto terkait berhasil dihapus.',
+        ], 200);
     }
 }

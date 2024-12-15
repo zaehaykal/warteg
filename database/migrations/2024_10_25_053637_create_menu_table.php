@@ -16,7 +16,7 @@ class CreateMenuTable extends Migration
             $table->string('nama');
             $table->string('harga');
             $table->string('kategori');
-            $table->timestamps(); // Menambahkan created_at dan updated_at
+            $table->timestamps();  
         });
     }
 

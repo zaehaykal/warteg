@@ -33,6 +33,9 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'Email harus diisi',
+            'password.required' => 'Password harus diisi',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -43,7 +46,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $tokenHasil = $user->createToken('user_login')->plainTextToken;
+        $tokenHasil = $user->createToken($user->name)->plainTextToken;
         $token = explode("|", $tokenHasil)[1];
 
         return response()->json([
@@ -68,7 +71,7 @@ class AuthController extends Controller
                 'id' => $data->id,
                 'name' => $data->name,
                 'nomorhp' => $data->nomorhp,
-                'jabatan' => $data->jabatan,
+                'role' => $data->role,
                 'email' => $data->email
             ]
         ], 200);

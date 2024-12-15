@@ -9,14 +9,21 @@ class Menu extends Model
 {
     use HasFactory;
 
-    // Menentukan nama tabel (opsional, jika tabel mengikuti konvensi Laravel, tidak perlu)
     protected $table = 'menu';
 
-    // Menentukan field yang bisa diisi
     protected $fillable = [
         'nama',
         'harga',
         'kategori',
         'foto',
     ];
+
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class);
+    }
+    public function subpesanan()
+    {
+        return $this->hasMany(Subpesanan::class, 'menu_id', 'id');
+    }
 }
